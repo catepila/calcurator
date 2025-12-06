@@ -11,14 +11,26 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Build APK with Buildozer
-      uses: ArtemSBulgakov/buildozer-action@master
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
-        command: buildozer android debug
-        buildozer_version: master
+        python-version: '3.9'
+    
+    - name: Install Buildozer
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y openjdk-11-jdk-headless
+        python -m pip install --upgrade pip
+        pip install cython buildozer
+    
+    - name: Build with Buildozer
+      run: |
+        cd $GITHUB_WORKSPACE
+        buildozer android debug
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
+      if: success()
       with:
         name: calculator-apk
         path: bin/*.apk
