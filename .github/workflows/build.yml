@@ -8,22 +8,34 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
-    container:
-      image: kivy/kivy:latest
-    
     steps:
     - uses: actions/checkout@v3
     
-    - name: Install Buildozer
-      run: |
-        apt-get update
-        apt-get install -y buildozer
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
     
-    - name: Build APK
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '11'
+    
+    - name: Install Buildozer and dependencies
       run: |
-        cd /github/workspace
+        python -m pip install --upgrade pip
+        pip install cython==0.29.32
+        pip install buildozer==1.4.6
+        pip install kivy
+    
+    - name: Build with Buildozer
+      run: |
         buildozer android debug
-        ls -lah bin/
+    
+    - name: Check output
+      run: |
+        find . -name "*.apk" -type f
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
